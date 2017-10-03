@@ -1,0 +1,23 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{title}}</title>
+</head>
+<body>
+  <h1>Welcome to page1</h1>
+  
+  <!-- links or URLs are always GET resources as they are getting (retrieving) a resource -->
+  <a href="/">Home</a>
+  <a href="/page2">Page 2</a>
+  <a href="/page3">Page 3</a>
+  <a href="/getName">Show Name</a>
+
+  {{#if cats}}
+    <ul>
+      {{#each cats}}
+        <li> {{this.name}} has {{this.bedsOwned}} beds. </li>
+      {{/each}}
+    </ul>
+  {{/if}}
+</body>
+</html>
