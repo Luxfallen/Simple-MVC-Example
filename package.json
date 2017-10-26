@@ -2,8 +2,8 @@
   "name": "simple-mvc-example",
   "version": "0.0.0",
   "engines": {
-    "node": "7.5.0",
-    "npm": "4.0.5"
+    "node": "8.4.0",
+    "npm": "5.3.0"
   },
   "description": "A simple Express MVC using only static files",
   "main": "./server/app.js",
@@ -16,8 +16,6 @@
   "author": "Cody Van De Mark",
   "license": "ISC",
   "devDependencies": {
-    "babel-cli": "^6.18.0",
-    "babel-preset-env": "^1.1.8",
     "eslint": "^3.18.0",
     "eslint-config-airbnb": "^14.1.0",
     "eslint-plugin-import": "^2.2.0",
