@@ -62,23 +62,23 @@ let CatModel = {};
 // default is the default value if one is not provided
 // match is the format to match done through regex
 const CatSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-        unique: true,
-    },
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+  },
 
-    bedsOwned: {
-        type: Number,
-        min: 0,
-        required: true,
-    },
+  bedsOwned: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
 
-    createdData: {
-        type: Date,
-        default: Date.now,
-    },
+  createdData: {
+    type: Date,
+    default: Date.now,
+  },
 
 });
 
@@ -88,7 +88,7 @@ const CatSchema = new mongoose.Schema({
 // no instance of them. Every static function
 // only exists once and is called.
 CatSchema.statics.sayName = (cat) => {
-    console.log(cat.name);
+  console.log(cat.name);
 };
 
 // Schema.statics are static methods attached to the Model or objects
@@ -103,11 +103,11 @@ CatSchema.statics.sayName = (cat) => {
 // not a method that uses or returns instance variables
 // That is, these are used when you don't need an object, just a function to call.
 CatSchema.statics.findByName = (name, callback) => {
-    const search = {
-        name,
-    };
+  const search = {
+    name,
+  };
 
-    return CatModel.findOne(search, callback);
+  return CatModel.findOne(search, callback);
 };
 
 // Create the cat model based on the schema. You provide it with a custom discriminator

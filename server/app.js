@@ -30,7 +30,9 @@ const router = require('./router.js');
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/simpleMVCExample';
 
 
-mongoose.connect(dbURL, (err) => {
+mongoose.connect(dbURL, {
+  useMongoClient: true,
+}, (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
@@ -79,7 +81,7 @@ app.use(favicon(`${__dirname}/../client/img/favicon.png`));
 app.use(cookieParser());
 
 // pass our app to our router object to map the routes
-router(app);
+router.router(app);
 
 // Tell the app to listen on the specified port
 app.listen(port, (err) => {
@@ -87,3 +89,4 @@ app.listen(port, (err) => {
   if (err) {
     throw err;
   }
+});

@@ -1,8 +1,9 @@
 // pull in our models. This will automatically load the index.js from that folder
 const models = require('../models');
 
-// get the Cat model
+// get the models
 const Cat = models.Cat.CatModel;
+const Dog = models.Dog.DogModel;
 
 // default fake data so that we have something to work with until we make a real Cat
 const defaultData = {
@@ -17,7 +18,6 @@ let lastAdded = new Cat(defaultData);
 // controller functions in Express receive the full HTTP request
 // and a pre-filled out response object to send
 const hostIndex = (req, res) => {
-
   // res.render takes a name of a page to render.
   // These must be in the folder you specified as views in your main app.js file
   // Additionally, you don't need .jade because you registered the
@@ -34,7 +34,6 @@ const hostIndex = (req, res) => {
 // function to find all cats on request.
 // Express functions always receive the request and the response.
 const readAllCats = (req, res, callback) => {
-
   // Call the model's built in find function and provide it a
   // callback to run when the query is complete
   // Find has several versions
@@ -45,11 +44,13 @@ const readAllCats = (req, res, callback) => {
   Cat.find(callback);
 };
 
+const readAllDogs = (req, res, callback) => {
+  Dog.find(callback);
+};
 
 // function to find a specific cat on request.
 // Express functions always receive the request and the response.
 const readCat = (req, res) => {
-
   const name1 = req.query.name;
 
   // function to call when we get objects back from the database.
@@ -115,23 +116,27 @@ const hostPage3 = (req, res) => {
   res.render('page3');
 };
 
+const hostPage4 = (req, res) => {
+  const callback = (err, docs) => {
+    if (err) {
+      return res.json({ err });
+    }
+    return res.render('page4', { dogs: docs });
+  };
+  readAllDogs(req, res, callback);
+};
+
 // function to handle get request to send the name
 // controller functions in Express receive the full HTTP request
 // and a pre-filled out response object to send
 const getName = (req, res) => {
-
   // res.json returns json to the page.
   // Since this sends back the data through HTTP
   // you can't send any more data to this user until the next response
   res.json({ name: lastAdded.name });
 };
 
-// function to handle a request to set the name
-// controller functions in Express receive the full HTTP request
-// and get a pre-filled out response object to send
-// ADDITIONALLY, with body-parser we will get the
-// body/form/POST data in the request as req.body
-const setName = (req, res) => {
+const setCat = (req, res) => {
   // check if the required fields exist
   // normally you would also perform validation
   // to know if the data they sent you was real
@@ -165,15 +170,64 @@ const setName = (req, res) => {
   });
 
   // if error, return it
-  savePromise.catch((err) => res.json({ err }));
+  savePromise.catch(err => res.json({ err }));
 
   return res;
+};
+
+const setDog = (req, res) => {
+  if (!req.body.name || !req.body.breed || !req.body.age) {
+    return res.status(400).json({ error: 'name,breed,and age are required fields' });
+  }
+  const dogData = {
+    name: req.body.name,
+    breed: req.body.breed,
+    age: req.body.age,
+  };
+
+  const newDog = new Dog(dogData);
+
+  const savePromise = newDog.save();
+  savePromise.then(() => {
+    lastAdded = newDog;
+    res.json({ name: lastAdded.name, breed: lastAdded.breed, age: lastAdded.age });
+  });
+
+  // Okay, what happened?
+  savePromise.catch(err => res.json({ err }));
+
+  return res;
+};
+
+// function to handle a request to set the name
+// controller functions in Express receive the full HTTP request
+// and get a pre-filled out response object to send
+// ADDITIONALLY, with body-parser we will get the
+// body/form/POST data in the request as req.body
+const setName = (req, res) => {
+  if (req.body.beds) {
+    return setCat(req, res);
+  } if (req.body.age) {
+    return setDog(req, res);
+  }
+  return res.status(400).json({ error: 'request not recognized' });
+};
+
+// Updates the age of the dog called
+const ageDog = (doc, res) => {
+  const tempDog = doc;
+  tempDog.age++;
+
+  const savePromise = tempDog.save();
+
+  savePromise.then(() => ({ name: tempDog.name, breed: tempDog.breed, age: tempDog.age }));
+  savePromise.catch(err => res.json({ err }));
 };
 
 // function to handle requests search for a name and return the object
 // controller functions in Express receive the full HTTP request
 // and a pre-filled out response object to send
-const searchName = (req, res) => {
+const searchCatName = (req, res) => {
   /* check if there is a query parameter for name
   BUT WAIT!!?!
   Why is this req.query and not req.body like the others
@@ -209,6 +263,22 @@ const searchName = (req, res) => {
   });
 };
 
+const searchDogName = (req, res) => {
+  if (!req.query.name) {
+    return res.json({ error: 'Name is required to perform a search' });
+  }
+
+  return Dog.findByName(req.query.name, (err, doc) => {
+    if (err) {
+      return res.json({ err });
+    }
+    if (!doc) {
+      return res.json({ error: 'No dogs found' });
+    }
+    return res.json(ageDog(doc, res));
+  });
+};
+
 // function to handle a request to update the last added object
 // this PURELY exists to show you how to update a model object
 // Normally for an update, you'd get data from the client,
@@ -216,7 +286,6 @@ const searchName = (req, res) => {
 // We will skip straight to updating an object
 // (that we stored as last added) and putting it back
 const updateLast = (req, res) => {
-
   // Your model is JSON, so just change a value in it.
   // This is the benefit of ORM (mongoose) and/or object documents (Mongo NoSQL)
   // You can treat objects just like that - objects.
@@ -233,7 +302,7 @@ const updateLast = (req, res) => {
   savePromise.then(() => res.json({ name: lastAdded.name, beds: lastAdded.bedsOwned }));
 
   // if save error, just return an error for now
-  savePromise.catch((err) => res.json({ err }));
+  savePromise.catch(err => res.json({ err }));
 };
 
 // function to handle a request to any non-real resources (404)
@@ -255,4 +324,14 @@ const notFound = (req, res) => {
 module.exports = {
   index: hostIndex,
   page1: hostPage1,
-}
+  page2: hostPage2,
+  page3: hostPage3,
+  page4: hostPage4,
+  readCat,
+  getName,
+  setName,
+  updateLast,
+  searchCatName,
+  searchDogName,
+  notFound,
+};
